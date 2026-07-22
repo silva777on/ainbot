@@ -1,163 +1,182 @@
--- SixAin v2.0 - Script Completo
-print("CARREGANDO SIXAIN...")
+-- SixAin - Arsenal Edition
+print("CARREGANDO SIXAIN PARA ARSENAL...")
 
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- Configurações
+-- CONFIGURAÇÕES
 local Config = {
     Aimbot = true,
     ESP = true,
     FOV = 150,
     FOVMin = 50,
     FOVMax = 350,
-    Sensibilidade = 0.3,
+    Sensibilidade = 0.2,
     AimPart = "Head",
-    ESPCor = Color3.fromRGB(160, 80, 255),
 }
 
--- Criar GUI
+-- CRIAR GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SixAinGUI"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Frame Principal
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 400, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-MainFrame.BackgroundTransparency = 0.1
+MainFrame.Size = UDim2.new(0, 350, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 20)
+Corner.CornerRadius = UDim.new(0, 16)
 Corner.Parent = MainFrame
 
--- Barra de Título
+-- Barra de Título (DRAG)
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 50)
-TitleBar.BackgroundColor3 = Color3.fromRGB(18, 18, 27)
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 18, 30)
 TitleBar.BorderSizePixel = 0
 TitleBar.Parent = MainFrame
 
 local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 20)
+TitleCorner.CornerRadius = UDim.new(0, 16)
 TitleCorner.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0.7, 0, 1, 0)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "SixAin v2.0"
+Title.Text = "SixAin ⚡ Arsenal"
 Title.TextColor3 = Color3.fromRGB(160, 80, 255)
-Title.TextSize = 22
+Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.Parent = TitleBar
 
--- Botão Fechar
-local FecharBtn = Instance.new("TextButton")
-FecharBtn.Size = UDim2.new(0, 40, 0, 30)
-FecharBtn.Position = UDim2.new(1, -45, 0.5, -15)
-FecharBtn.BackgroundColor3 = Color3.fromRGB(177, 58, 75)
-FecharBtn.BackgroundTransparency = 0.3
-FecharBtn.Text = "✕"
-FecharBtn.TextColor3 = Color3.fromRGB(200, 200, 255)
-FecharBtn.TextSize = 16
-FecharBtn.Font = Enum.Font.GothamBold
-FecharBtn.BorderSizePixel = 0
-FecharBtn.Parent = TitleBar
+-- Botões
+local function CriarBotao(texto, posX, cor, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 32, 0, 28)
+    btn.Position = UDim2.new(posX, 0, 0.5, -14)
+    btn.BackgroundColor3 = cor or Color3.fromRGB(40, 35, 55)
+    btn.BackgroundTransparency = 0.3
+    btn.Text = texto
+    btn.TextColor3 = Color3.fromRGB(220, 210, 255)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.Parent = TitleBar
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+    
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
 
-local FecharCorner = Instance.new("UICorner")
-FecharCorner.CornerRadius = UDim.new(0, 8)
-FecharCorner.Parent = FecharBtn
-
-FecharBtn.MouseButton1Click:Connect(function()
+local function Fechar()
     ScreenGui:Destroy()
-end)
+end
 
--- Botão Minimizar
-local MinimizarBtn = Instance.new("TextButton")
-MinimizarBtn.Size = UDim2.new(0, 40, 0, 30)
-MinimizarBtn.Position = UDim2.new(1, -90, 0.5, -15)
-MinimizarBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-MinimizarBtn.BackgroundTransparency = 0.3
-MinimizarBtn.Text = "─"
-MinimizarBtn.TextColor3 = Color3.fromRGB(200, 200, 255)
-MinimizarBtn.TextSize = 16
-MinimizarBtn.Font = Enum.Font.GothamBold
-MinimizarBtn.BorderSizePixel = 0
-MinimizarBtn.Parent = TitleBar
-
-local MinimizarCorner = Instance.new("UICorner")
-MinimizarCorner.CornerRadius = UDim.new(0, 8)
-MinimizarCorner.Parent = MinimizarBtn
-
-MinimizarBtn.MouseButton1Click:Connect(function()
+local function Minimizar()
     MainFrame.Visible = not MainFrame.Visible
+end
+
+CriarBotao("─", 0.85, nil, Minimizar)
+CriarBotao("✕", 0.94, Color3.fromRGB(177, 58, 75), Fechar)
+
+-- DRAG (mover a janela)
+local dragging = false
+local dragStartPos, startMousePos
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStartPos = MainFrame.Position
+        startMousePos = input.Position
+    end
 end)
 
--- Conteúdo
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - startMousePos
+        MainFrame.Position = UDim2.new(
+            dragStartPos.X.Scale,
+            dragStartPos.X.Offset + delta.X,
+            dragStartPos.Y.Scale,
+            dragStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- CONTEÚDO
 local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -40, 1, -70)
-Content.Position = UDim2.new(0, 20, 0, 60)
+Content.Size = UDim2.new(1, -20, 1, -50)
+Content.Position = UDim2.new(0, 10, 0, 48)
 Content.BackgroundTransparency = 1
 Content.Parent = MainFrame
 
--- Criar Toggle
-local function CriarToggle(posX, texto, configVar)
+-- Toggles
+local function CriarToggle(texto, posY, configVar)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0.45, 0, 0, 40)
-    frame.Position = UDim2.new(posX, 0, 0, 0)
+    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.Position = UDim2.new(0, 0, 0, posY)
     frame.BackgroundTransparency = 1
     frame.Parent = Content
     
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.Size = UDim2.new(0.5, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Text = texto
-    label.TextColor3 = Color3.fromRGB(200, 180, 230)
-    label.TextSize = 15
+    label.TextColor3 = Color3.fromRGB(200, 185, 230)
+    label.TextSize = 14
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Font = Enum.Font.GothamMedium
     label.Parent = frame
     
     local toggle = Instance.new("Frame")
-    toggle.Size = UDim2.new(0, 50, 0, 26)
-    toggle.Position = UDim2.new(1, -60, 0.5, -13)
-    toggle.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
+    toggle.Size = UDim2.new(0, 44, 0, 22)
+    toggle.Position = UDim2.new(1, -50, 0.5, -11)
+    toggle.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
     toggle.BorderSizePixel = 0
     toggle.Parent = frame
     
     local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(0, 13)
+    toggleCorner.CornerRadius = UDim.new(0, 11)
     toggleCorner.Parent = toggle
     
     local indicator = Instance.new("Frame")
-    indicator.Size = UDim2.new(0, 22, 0, 22)
-    indicator.Position = UDim2.new(0, 2, 0.5, -11)
+    indicator.Size = UDim2.new(0, 18, 0, 18)
+    indicator.Position = UDim2.new(0, 2, 0.5, -9)
     indicator.BackgroundColor3 = Color3.fromRGB(100, 80, 150)
     indicator.BorderSizePixel = 0
     indicator.Parent = toggle
     
     local indicatorCorner = Instance.new("UICorner")
-    indicatorCorner.CornerRadius = UDim.new(0, 11)
+    indicatorCorner.CornerRadius = UDim.new(0, 9)
     indicatorCorner.Parent = indicator
     
     local function updateToggle(value)
         if value then
             toggle.BackgroundColor3 = Color3.fromRGB(80, 40, 150)
             indicator.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
-            indicator.Position = UDim2.new(1, -24, 0.5, -11)
+            indicator.Position = UDim2.new(1, -20, 0.5, -9)
         else
-            toggle.BackgroundColor3 = Color3.fromRGB(40, 30, 60)
+            toggle.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
             indicator.BackgroundColor3 = Color3.fromRGB(100, 80, 150)
-            indicator.Position = UDim2.new(0, 2, 0.5, -11)
+            indicator.Position = UDim2.new(0, 2, 0.5, -9)
         end
     end
     
@@ -173,20 +192,20 @@ local function CriarToggle(posX, texto, configVar)
     return toggle
 end
 
-CriarToggle(0, "Aimbot", Config.Aimbot)
-CriarToggle(0.55, "ESP", Config.ESP)
+CriarToggle("🎯 Aimbot", 0, Config.Aimbot)
+CriarToggle("👁️ ESP", 40, Config.ESP)
 
 -- FOV Slider
 local FOVFrame = Instance.new("Frame")
-FOVFrame.Size = UDim2.new(1, 0, 0, 60)
-FOVFrame.Position = UDim2.new(0, 0, 0, 50)
-FOVFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 22)
+FOVFrame.Size = UDim2.new(1, 0, 0, 50)
+FOVFrame.Position = UDim2.new(0, 0, 0, 80)
+FOVFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 20)
 FOVFrame.BorderSizePixel = 1
-FOVFrame.BorderColor3 = Color3.fromRGB(38, 32, 58)
+FOVFrame.BorderColor3 = Color3.fromRGB(35, 30, 50)
 FOVFrame.Parent = Content
 
 local FOVCorner = Instance.new("UICorner")
-FOVCorner.CornerRadius = UDim.new(0, 15)
+FOVCorner.CornerRadius = UDim.new(0, 10)
 FOVCorner.Parent = FOVFrame
 
 local FOVLabel = Instance.new("TextLabel")
@@ -194,8 +213,8 @@ FOVLabel.Size = UDim2.new(0.2, 0, 1, 0)
 FOVLabel.Position = UDim2.new(0.05, 0, 0, 0)
 FOVLabel.BackgroundTransparency = 1
 FOVLabel.Text = "FOV:"
-FOVLabel.TextColor3 = Color3.fromRGB(180, 160, 210)
-FOVLabel.TextSize = 15
+FOVLabel.TextColor3 = Color3.fromRGB(180, 165, 210)
+FOVLabel.TextSize = 13
 FOVLabel.TextXAlignment = Enum.TextXAlignment.Left
 FOVLabel.Font = Enum.Font.GothamMedium
 FOVLabel.Parent = FOVFrame
@@ -206,19 +225,19 @@ FOVValue.Position = UDim2.new(0.85, 0, 0, 0)
 FOVValue.BackgroundTransparency = 1
 FOVValue.Text = tostring(Config.FOV)
 FOVValue.TextColor3 = Color3.fromRGB(200, 180, 255)
-FOVValue.TextSize = 15
+FOVValue.TextSize = 14
 FOVValue.Font = Enum.Font.GothamBold
 FOVValue.Parent = FOVFrame
 
 local Slider = Instance.new("Frame")
-Slider.Size = UDim2.new(0.5, 0, 0.4, 0)
-Slider.Position = UDim2.new(0.25, 0, 0.5, -0.2)
-Slider.BackgroundColor3 = Color3.fromRGB(40, 35, 60)
+Slider.Size = UDim2.new(0.5, 0, 0.35, 0)
+Slider.Position = UDim2.new(0.25, 0, 0.5, -0.15)
+Slider.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
 Slider.BorderSizePixel = 0
 Slider.Parent = FOVFrame
 
 local SliderCorner = Instance.new("UICorner")
-SliderCorner.CornerRadius = UDim.new(0, 8)
+SliderCorner.CornerRadius = UDim.new(0, 6)
 SliderCorner.Parent = Slider
 
 local Fill = Instance.new("Frame")
@@ -228,71 +247,71 @@ Fill.BorderSizePixel = 0
 Fill.Parent = Slider
 
 local FillCorner = Instance.new("UICorner")
-FillCorner.CornerRadius = UDim.new(0, 8)
+FillCorner.CornerRadius = UDim.new(0, 6)
 FillCorner.Parent = Fill
 
 local Handle = Instance.new("TextButton")
-Handle.Size = UDim2.new(0, 20, 0, 20)
-Handle.Position = UDim2.new(Fill.Size.X.Scale, -10, 0.5, -10)
+Handle.Size = UDim2.new(0, 16, 0, 16)
+Handle.Position = UDim2.new(Fill.Size.X.Scale, -8, 0.5, -8)
 Handle.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
 Handle.Text = ""
 Handle.BorderSizePixel = 0
 Handle.Parent = Slider
 
 local HandleCorner = Instance.new("UICorner")
-HandleCorner.CornerRadius = UDim.new(0, 10)
+HandleCorner.CornerRadius = UDim.new(0, 8)
 HandleCorner.Parent = Handle
 
-local dragging = false
-local function updateSlider(mouseX)
-    local relX = math.clamp((mouseX - Slider.AbsolutePosition.X) / Slider.AbsoluteSize.X, 0, 1)
+local sliderDragging = false
+local function updateSlider(inputPos)
+    local relX = math.clamp((inputPos.X - Slider.AbsolutePosition.X) / Slider.AbsoluteSize.X, 0, 1)
     local newFOV = Config.FOVMin + (Config.FOVMax - Config.FOVMin) * relX
     newFOV = math.round(newFOV / 5) * 5
     Config.FOV = math.clamp(newFOV, Config.FOVMin, Config.FOVMax)
     
     Fill.Size = UDim2.new((Config.FOV - Config.FOVMin) / (Config.FOVMax - Config.FOVMin), 0, 1, 0)
-    Handle.Position = UDim2.new(Fill.Size.X.Scale, -10, 0.5, -10)
+    Handle.Position = UDim2.new(Fill.Size.X.Scale, -8, 0.5, -8)
     FOVValue.Text = tostring(Config.FOV)
 end
 
 Handle.MouseButton1Down:Connect(function()
-    dragging = true
+    sliderDragging = true
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
+        sliderDragging = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        updateSlider(input.Position.X)
+    if sliderDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        updateSlider(input.Position)
     end
 end)
 
--- ESP Status
+-- Status ESP
 local ESPStatus = Instance.new("Frame")
-ESPStatus.Size = UDim2.new(0.8, 0, 0, 35)
-ESPStatus.Position = UDim2.new(0.1, 0, 0, 120)
-ESPStatus.BackgroundColor3 = Color3.fromRGB(12, 11, 19)
+ESPStatus.Size = UDim2.new(0.7, 0, 0, 28)
+ESPStatus.Position = UDim2.new(0.15, 0, 0, 138)
+ESPStatus.BackgroundColor3 = Color3.fromRGB(10, 10, 18)
 ESPStatus.BorderSizePixel = 1
-ESPStatus.BorderColor3 = Color3.fromRGB(45, 36, 66)
+ESPStatus.BorderColor3 = Color3.fromRGB(40, 35, 55)
 ESPStatus.Parent = Content
 
 local ESPCorner = Instance.new("UICorner")
-ESPCorner.CornerRadius = UDim.new(0, 20)
+ESPCorner.CornerRadius = UDim.new(0, 14)
 ESPCorner.Parent = ESPStatus
 
 local Dot = Instance.new("Frame")
-Dot.Size = UDim2.new(0, 10, 0, 10)
-Dot.Position = UDim2.new(0.08, 0, 0.5, -5)
-Dot.BackgroundColor3 = Config.ESP and Color3.fromRGB(160, 80, 255) or Color3.fromRGB(75, 52, 112)
+Dot.Size = UDim2.new(0, 8, 0, 8)
+Dot.Position = UDim2.new(0.08, 0, 0.5, -4)
+Dot.BackgroundColor3 = Config.ESP and Color3.fromRGB(160, 80, 255) or Color3.fromRGB(70, 50, 100)
 Dot.BorderSizePixel = 0
 Dot.Parent = ESPStatus
 
 local DotCorner = Instance.new("UICorner")
-DotCorner.CornerRadius = UDim.new(0, 5)
+DotCorner.CornerRadius = UDim.new(0, 4)
 DotCorner.Parent = Dot
 
 local ESPLabel = Instance.new("TextLabel")
@@ -300,13 +319,13 @@ ESPLabel.Size = UDim2.new(0.8, 0, 1, 0)
 ESPLabel.Position = UDim2.new(0.15, 0, 0, 0)
 ESPLabel.BackgroundTransparency = 1
 ESPLabel.Text = Config.ESP and "ESP Ativo" or "ESP Inativo"
-ESPLabel.TextColor3 = Color3.fromRGB(180, 160, 210)
-ESPLabel.TextSize = 14
+ESPLabel.TextColor3 = Color3.fromRGB(180, 165, 210)
+ESPLabel.TextSize = 12
 ESPLabel.TextXAlignment = Enum.TextXAlignment.Left
 ESPLabel.Font = Enum.Font.GothamMedium
 ESPLabel.Parent = ESPStatus
 
--- Sistema de Aimbot
+-- SISTEMA AIMBOT (ESPECÍFICO ARSENAL)
 local function GetClosestPlayer()
     local closest = nil
     local closestDist = Config.FOV
@@ -314,7 +333,8 @@ local function GetClosestPlayer()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
             local character = player.Character
-            local targetPart = character:FindFirstChild(Config.AimPart) or character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+            -- Arsenal usa "Head" ou "UpperTorso"
+            local targetPart = character:FindFirstChild("Head") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
             
             if targetPart then
                 local screenPos, onScreen = Camera:WorldToScreenPoint(targetPart.Position)
@@ -334,7 +354,7 @@ local function GetClosestPlayer()
     return closest
 end
 
--- Sistema de ESP
+-- SISTEMA ESP (ESPECÍFICO ARSENAL)
 local ESPObjects = {}
 
 local function CriarESP(player)
@@ -344,17 +364,19 @@ local function CriarESP(player)
     local humanoid = character:FindFirstChild("Humanoid")
     if not humanoid then return end
     
+    -- Caixa ao redor
     local box = Instance.new("BoxHandleAdornment")
     box.Size = Vector3.new(3, 5, 2)
-    box.Color3 = Config.ESPCor
-    box.Transparency = 0.3
+    box.Color3 = Color3.fromRGB(160, 80, 255)
+    box.Transparency = 0.25
     box.ZIndex = 0
     box.AlwaysOnTop = true
     box.Adornee = character
     box.Parent = character
     
+    -- Nome
     local nameTag = Instance.new("BillboardGui")
-    nameTag.Size = UDim2.new(0, 100, 0, 30)
+    nameTag.Size = UDim2.new(0, 100, 0, 25)
     nameTag.Adornee = character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
     nameTag.Parent = character
     
@@ -362,16 +384,17 @@ local function CriarESP(player)
     nameLabel.Size = UDim2.new(1, 0, 1, 0)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = player.Name
-    nameLabel.TextColor3 = Config.ESPCor
-    nameLabel.TextSize = 14
+    nameLabel.TextColor3 = Color3.fromRGB(160, 80, 255)
+    nameLabel.TextSize = 12
     nameLabel.Font = Enum.Font.GothamBold
     nameLabel.TextStrokeTransparency = 0.5
     nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     nameLabel.Parent = nameTag
     
+    -- Barra de Vida
     local healthBar = Instance.new("BillboardGui")
-    healthBar.Size = UDim2.new(0, 50, 0, 6)
-    healthBar.Position = UDim2.new(0, -25, 0, 25)
+    healthBar.Size = UDim2.new(0, 50, 0, 4)
+    healthBar.Position = UDim2.new(0, -25, 0, 22)
     healthBar.Adornee = character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
     healthBar.Parent = character
     
@@ -425,12 +448,13 @@ local function UpdateESP()
     end
 end
 
--- Loop principal
+-- LOOP PRINCIPAL
 local function MainLoop()
+    -- Aimbot
     if Config.Aimbot then
         local target = GetClosestPlayer()
         if target and target.Character then
-            local targetPart = target.Character:FindFirstChild(Config.AimPart) or target.Character:FindFirstChild("HumanoidRootPart")
+            local targetPart = target.Character:FindFirstChild("Head") or target.Character:FindFirstChild("UpperTorso") or target.Character:FindFirstChild("HumanoidRootPart")
             if targetPart then
                 local screenPos = Camera:WorldToScreenPoint(targetPart.Position)
                 if screenPos then
@@ -443,6 +467,7 @@ local function MainLoop()
         end
     end
     
+    -- ESP
     if Config.ESP then
         UpdateESP()
     else
@@ -455,9 +480,9 @@ local function MainLoop()
     end
 end
 
--- Iniciar
 RunService.RenderStepped:Connect(MainLoop)
 
+-- Limpar quando o personagem mudar
 LocalPlayer.CharacterAdded:Connect(function()
     for player, data in pairs(ESPObjects) do
         if data.Box then data.Box:Destroy() end
@@ -467,5 +492,8 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-print("SixAin v2.0 carregado com sucesso!")
-print("🎯 Aimbot ativado | 👁️ ESP ativado | FOV: " .. Config.FOV)
+print("✅ SixAin Arsenal carregado!")
+print("🎯 Aimbot: " .. (Config.Aimbot and "ATIVO" or "DESATIVADO"))
+print("👁️ ESP: " .. (Config.ESP and "ATIVO" or "DESATIVADO"))
+print("📐 FOV: " .. Config.FOV)
+print("Use a interface para configurar!")
