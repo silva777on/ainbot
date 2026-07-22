@@ -1,4 +1,4 @@
--- SixAin v2.0 - Script Completo
+    -- SixAin v2.0 - Script Completo
 -- Copie e cole no seu executor
 
 local function CarregarSixAin()
