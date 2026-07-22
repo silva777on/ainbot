@@ -1,4 +1,4 @@
--- SixAin - Arsenal Edition
+-- SixAin - Arsenal Edition (CORRIGIDO)
 print("CARREGANDO SIXAIN PARA ARSENAL...")
 
 local Players = game:GetService("Players")
@@ -23,6 +23,9 @@ local Config = {
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SixAinGUI"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Variável para controlar se o menu está visível
+local MenuVisivel = true
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 350, 0, 280)
@@ -51,9 +54,9 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.6, 0, 1, 0)
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "SixAin ⚡ Arsenal"
+Title.Text = "⚡ SixAin Arsenal"
 Title.TextColor3 = Color3.fromRGB(160, 80, 255)
-Title.TextSize = 18
+Title.TextSize = 17
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamBold
 Title.Parent = TitleBar
@@ -80,16 +83,18 @@ local function CriarBotao(texto, posX, cor, callback)
     return btn
 end
 
-local function Fechar()
+-- FECHAR - Destroi a GUI completamente
+CriarBotao("✕", 0.94, Color3.fromRGB(177, 58, 75), function()
     ScreenGui:Destroy()
-end
+    print("SixAin: Interface fechada")
+end)
 
-local function Minimizar()
-    MainFrame.Visible = not MainFrame.Visible
-end
-
-CriarBotao("─", 0.85, nil, Minimizar)
-CriarBotao("✕", 0.94, Color3.fromRGB(177, 58, 75), Fechar)
+-- MINIMIZAR - Alterna visibilidade (NÃO DESTROI)
+CriarBotao("─", 0.85, nil, function()
+    MenuVisivel = not MenuVisivel
+    MainFrame.Visible = MenuVisivel
+    print("Menu visível:", MenuVisivel)
+end)
 
 -- DRAG (mover a janela)
 local dragging = false
@@ -185,8 +190,14 @@ local function CriarToggle(texto, posY, configVar)
     toggle.MouseButton1Click:Connect(function()
         configVar = not configVar
         updateToggle(configVar)
-        if texto == "Aimbot" then Config.Aimbot = configVar end
-        if texto == "ESP" then Config.ESP = configVar end
+        if texto == "🎯 Aimbot" then 
+            Config.Aimbot = configVar
+            print("Aimbot:", configVar and "ATIVO" or "DESATIVADO")
+        end
+        if texto == "👁️ ESP" then 
+            Config.ESP = configVar
+            print("ESP:", configVar and "ATIVO" or "DESATIVADO")
+        end
     end)
     
     return toggle
@@ -325,7 +336,7 @@ ESPLabel.TextXAlignment = Enum.TextXAlignment.Left
 ESPLabel.Font = Enum.Font.GothamMedium
 ESPLabel.Parent = ESPStatus
 
--- SISTEMA AIMBOT (ESPECÍFICO ARSENAL)
+-- SISTEMA AIMBOT
 local function GetClosestPlayer()
     local closest = nil
     local closestDist = Config.FOV
@@ -333,7 +344,6 @@ local function GetClosestPlayer()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
             local character = player.Character
-            -- Arsenal usa "Head" ou "UpperTorso"
             local targetPart = character:FindFirstChild("Head") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
             
             if targetPart then
@@ -354,7 +364,7 @@ local function GetClosestPlayer()
     return closest
 end
 
--- SISTEMA ESP (ESPECÍFICO ARSENAL)
+-- SISTEMA ESP
 local ESPObjects = {}
 
 local function CriarESP(player)
@@ -364,7 +374,7 @@ local function CriarESP(player)
     local humanoid = character:FindFirstChild("Humanoid")
     if not humanoid then return end
     
-    -- Caixa ao redor
+    -- Caixa
     local box = Instance.new("BoxHandleAdornment")
     box.Size = Vector3.new(3, 5, 2)
     box.Color3 = Color3.fromRGB(160, 80, 255)
@@ -391,7 +401,7 @@ local function CriarESP(player)
     nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     nameLabel.Parent = nameTag
     
-    -- Barra de Vida
+    -- Vida
     local healthBar = Instance.new("BillboardGui")
     healthBar.Size = UDim2.new(0, 50, 0, 4)
     healthBar.Position = UDim2.new(0, -25, 0, 22)
@@ -492,8 +502,18 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
+-- TECLA PARA ABRIR/FECHAR MENU (INSERT)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        MenuVisivel = not MenuVisivel
+        MainFrame.Visible = MenuVisivel
+        print("Menu:", MenuVisivel and "ABERTO" or "FECHADO")
+    end
+end)
+
 print("✅ SixAin Arsenal carregado!")
 print("🎯 Aimbot: " .. (Config.Aimbot and "ATIVO" or "DESATIVADO"))
 print("👁️ ESP: " .. (Config.ESP and "ATIVO" or "DESATIVADO"))
 print("📐 FOV: " .. Config.FOV)
-print("Use a interface para configurar!")
+print("🔑 Pressione INSERT para abrir/fechar o menu")
