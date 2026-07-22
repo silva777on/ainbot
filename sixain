@@ -1,7 +1,7 @@
 -- SixAin v2.0 - Script Completo
 -- Copie e cole no seu executor
 
-local SixAin = loadstring([[
+local function CarregarSixAin()
     -- Variáveis principais
     local SixAin = {
         Nome = "SixAin",
@@ -508,9 +508,7 @@ local SixAin = loadstring([[
     print("SixAin v2.0 carregado com sucesso!")
     print("🎯 Aimbot ativado | 👁️ ESP ativado | FOV: " .. Config.FOV)
     print("Use a interface para configurar!")
-    
-    return SixAin
-]])
+end
 
 -- Executar
-SixAin()
+CarregarSixAin()
