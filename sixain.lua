@@ -1,46 +1,40 @@
--- MÉTODO DIRETO PARA DELTA
-print("📥 Baixando loader diretamente...")
+-- Rode isso ANTES do loader
+print("🔍 ANALISANDO REMOTES...")
 
--- Tenta baixar o loader
-local success, content = pcall(function()
-    return game:HttpGet("https://saiops.cc/loader.lua")
-end)
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local remoteEvents = {}
 
-if success and content then
-    print("✅ CONTEÚDO BAIXADO! (" .. string.len(content) .. " caracteres)")
-    print("=" .. string.rep("=", 60))
-    print("📦 CONTEÚDO DO LOADER:")
-    print(content)
-    print("=" .. string.rep("=", 60))
-    
-    -- Tenta salvar no clipboard
-    pcall(function()
-        if setclipboard then
-            setclipboard(content)
-            print("📋 CONTEÚDO COPIADO PARA O CLIPBOARD!")
-            print("👉 Cole em um bloco de notas para analisar")
-        end
-    end)
-    
-    -- Tenta salvar como arquivo
-    pcall(function()
-        if writefile then
-            writefile("loader_capturado.lua", content)
-            print("💾 ARQUIVO SALVO: loader_capturado.lua")
-        end
-    end)
-    
-    -- Mostra as primeiras 20 linhas
-    local lines = {}
-    for line in content:gmatch("[^\n]+") do
-        table.insert(lines, line)
-        if #lines >= 20 then break end
+-- Lista todos os RemoteEvents
+for _, obj in pairs(replicatedStorage:GetDescendants()) do
+    if obj:IsA("RemoteEvent") then
+        table.insert(remoteEvents, obj.Name)
+        print("📡 RemoteEvent encontrado:", obj.Name)
     end
-    print("📄 Primeiras 20 linhas:")
-    for i, line in pairs(lines) do
-        print(i .. ": " .. line)
+end
+
+print("=" .. string.rep("=", 50))
+print("🔍 Total de RemoteEvents:", #remoteEvents)
+
+-- Roda o loader
+print("🚀 Executando loader...")
+getgenv().KEY_SYSTEM_CONFIG = { ScriptId = 2, Standalone = true }
+loadstring(game:HttpGet("https://saiops.cc/loader.lua"))()
+
+-- Depois de 5 segundos, verifica o que mudou
+task.wait(5)
+print("🔍 Verificando mudanças...")
+
+-- Procura por novos objetos ou funções
+for _, obj in pairs(replicatedStorage:GetDescendants()) do
+    if obj:IsA("RemoteEvent") and not table.find(remoteEvents, obj.Name) then
+        print("🆕 NOVO RemoteEvent detectado:", obj.Name)
     end
-else
-    print("❌ Falha ao baixar o loader.")
-    print("Erro: " .. tostring(content))
+end
+
+-- Procura por funções globais que podem ter sido criadas
+print("🔍 Funções globais:")
+for key, value in pairs(getgenv()) do
+    if type(value) == "function" then
+        print("  -", key, "é uma função")
+    end
 end
