@@ -1,69 +1,84 @@
--- SCRIPT PARA ANALISAR O JOGO DIRETAMENTE
-print("🔍 ANALISANDO O JOGO...")
+-- SCRIPT PARA CAPTURAR PET SEM LASSO (BASEADO NA PISTA)
+print("🔍 TESTANDO CAPTURA DIRETA...")
 
--- 1. Procura por funções de captura no jogo
-local function findCaptureFunctions()
-    print("📡 Procurando funções de captura...")
+local function CapturePetDirect(pet)
+    if not pet then return false end
     
-    -- Procura em ReplicatedStorage
-    local replicatedStorage = game:GetService("ReplicatedStorage")
+    -- Procura a pasta "Pets" onde os pets capturados vão
+    local petsFolder = workspace:FindFirstChild("Pets") 
+        or workspace:FindFirstChild("PlayerPets")
+        or workspace:FindFirstChild("CapturedPets")
+        or Player:FindFirstChild("Pets")
     
-    for _, obj in pairs(replicatedStorage:GetDescendants()) do
-        if obj:IsA("RemoteEvent") then
-            local name = obj.Name:lower()
-            if name:find("captur") or name:find("catch") or name:find("pet") or name:find("lasso") or name:find("tame") then
-                print("🔍 RemoteEvent encontrado:", obj.Name)
-            end
-        elseif obj:IsA("RemoteFunction") then
-            local name = obj.Name:lower()
-            if name:find("captur") or name:find("catch") or name:find("pet") or name:find("lasso") or name:find("tame") then
-                print("🔍 RemoteFunction encontrado:", obj.Name)
-            end
-        end
+    if not petsFolder then
+        print("❌ Pasta 'Pets' não encontrada! Criando uma...")
+        petsFolder = Instance.new("Folder")
+        petsFolder.Name = "Pets"
+        petsFolder.Parent = workspace
     end
     
-    -- Procura em Workspace
+    print("📁 Pasta Pets encontrada:", petsFolder.Name)
+    print("🎯 Tentando capturar:", pet.Name)
+    
+    -- Tenta mover o pet para a pasta Pets
+    local success = pcall(function()
+        pet.Parent = petsFolder
+        
+        -- Se tiver Humanoid, desativa ele
+        local humanoid = pet:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.Health = 0
+            task.wait(0.1)
+            humanoid:Destroy()
+        end
+    end)
+    
+    if success then
+        print("✅ " .. pet.Name .. " capturado com sucesso!")
+        return true
+    else
+        print("❌ Falha ao capturar " .. pet.Name)
+        return false
+    end
+end
+
+-- ==== FUNÇÃO PARA ENCONTRAR PETS ====
+local function FindNearbyPets()
+    local pets = {}
+    local character = game:GetService("Players").LocalPlayer.Character
+    if not character then return pets end
+    
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return pets end
+    
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") then
+            if obj == character then continue end
+            
             local name = obj.Name:lower()
-            if name:find("pet") or name:find("animal") then
-                -- Verifica se tem alguma função de clique
-                if obj:FindFirstChild("ClickDetector") then
-                    print("🔍 Pet com ClickDetector:", obj.Name)
+            if name:find("base") or name:find("floor") or name:find("wall") then continue end
+            if name:find("npc") or name:find("humano") then continue end
+            
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local dist = (root.Position - hrp.Position).Magnitude
+                if dist < 50 then -- Só pets próximos
+                    table.insert(pets, obj)
                 end
             end
         end
     end
+    return pets
 end
 
--- 2. Tenta capturar manualmente e ver o que acontece
-local function testCapture()
-    print("🎯 Testando captura manual...")
-    print("👉 Clique em um pet agora!")
+-- ==== TESTE: CAPTURA O PET MAIS PRÓXIMO ====
+local pets = FindNearbyPets()
+if #pets > 0 then
+    print("🔍 Encontrados " .. #pets .. " pets próximos")
     
-    -- Monitora cliques
-    local mouse = game:GetService("Players").LocalPlayer:GetMouse()
-    mouse.Button1Down:Connect(function()
-        print("🖱️ Clique detectado!")
-        
-        -- Verifica o que foi clicado
-        local target = mouse.Target
-        if target then
-            print("   Alvo:", target.Name)
-            print("   Parent:", target.Parent and target.Parent.Name)
-            
-            -- Procura por RemoteEvents próximos
-            local remote = target.Parent and target.Parent:FindFirstChild("RemoteEvent")
-            if remote then
-                print("   RemoteEvent encontrado:", remote.Name)
-            end
-        end
-    end)
+    -- Pega o mais próximo
+    local target = pets[1]
+    CapturePetDirect(target)
+else
+    print("❌ Nenhum pet encontrado por perto")
 end
-
--- Executa as análises
-print("=" .. string.rep("=", 50))
-findCaptureFunctions()
-print("=" .. string.rep("=", 50))
-testCapture()
-print("✅ Análise iniciada! Clique em um pet para ver o que acontece.")
